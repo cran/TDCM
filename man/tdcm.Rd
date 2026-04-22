@@ -9,109 +9,634 @@ tdcm(
   q.matrix,
   num.time.points,
   invariance = TRUE,
-  rule = "GDINA",
+  rule = "LCDM",
+  linkfct = "logit",
   num.q.matrix = 1,
   num.items = c(),
   anchor = c(),
-  progress = FALSE
+  forget.att = c(),
+  progress = TRUE
 )
 }
 \arguments{
-\item{data}{A required \eqn{N \times T \times I} data matrix containing binary item responses.
-For each time point, the binary item responses are in the columns.}
+\item{data}{A required \eqn{N \times T \times I} \code{matrix} or \code{data.frame} where rows correspond to \code{N} examinees and columns represent the binary item responses across \code{T} time points and \code{I} items.}
 
-\item{q.matrix}{A required \eqn{I \times A} matrix indicating which items measure which
-attributes. If there are multiple Q-matrices, then they must have the same number of attributes
-and must be stacked on top of each other for estimation (to specify multiple Q-matrices, see
-\code{num.q.matrix}, \code{num.items}, and \code{anchor}).}
+\item{q.matrix}{A required \eqn{I \times A} \code{matrix} indicating which items measure which attributes. If there are multiple Q-matrices, then they must have the same number of attributes and must be stacked on top of each other for estimation (to specify multiple Q-matrices, see \code{num.q.matrix}, \code{num.items}, and \code{anchor}).}
 
-\item{num.time.points}{A required integer \eqn{\ge 2} specifying the number of time points (i.e.,
-measurement / testing occasions).}
+\item{num.time.points}{A required integer \eqn{\ge 2} specifying the number of time points (i.e., measurement occasions).}
 
-\item{invariance}{logical. If \code{TRUE} (the default), the item parameter invariance will be
-constrained to be equal at each time point. If \code{FALSE}, item parameters are not assumed to be
-equal over time.}
+\item{invariance}{logical. If \code{TRUE} (the default), then item parameters will be constrained to be equal at each time point. If \code{FALSE}, item parameters are not assumed to be equal over time.}
 
-\item{rule}{A string or a vector of the specific DCM to be employed. Currently accepts the
-same values as \code{rule} in \code{\link[CDM:gdina]{CDM::gdina()}}. The default is \code{"GDINA"}, which is implemented with a
-logit link to estimate the LCDM. If \code{rule} is supplied as a single string, then that DCM will
-be assumed for each item. If entered as a vector, a DCM can be specified for each item.}
+\item{rule}{A \code{string} or a \code{vector} indicating the specific DCM to be employed. A vector of supported \code{rule} values is provided by \link{tdcm.rules}. Currently accepted values are: "LCDM", "DINA", "DINO", "CRUM", "RRUM", "LCDM1" for the LCDM with only main effects, "LCDM2" for the LCDM with two-way interactions, "LCDM3", and so on. If \code{rule} is supplied as a single string, then that DCM will be assumed for each item. If entered as a vector, a rule can be specified for each item. The rule vector must have length equal to
+the total number of items across all time points.}
 
-\item{num.q.matrix}{An optional integer specifying the number of Q-matrices. For many
-applications, the same assessment is administered at each time point and this number is 1 (the
-default). If there are different Q-matrices for each time point, then this argument must be
-specified and should be equal to the number of time points. For example, if there are three time
-points, and the Q-matrix for each time point is different, then \code{num.q.matrix = 3}. If there are
-three time points, and the Q-matrix is different only for time point 3, then \code{num.q.matrix} is
-still specified as \code{3}.}
+\item{linkfct}{A \code{string} or a \code{vector} indicating the LCDM link function. Currently accepts "logit" (default) to estimate the LCDM, "identity" to estimate the GDINA model, and "log" link function to estimate the reduced reparameterized unified model (RRUM).
+The link function vector must have length equal to the total number of items across all time points.}
 
-\item{num.items}{An optional integer specifying the number of Q-matrices (the default is \code{1}).
-when there are multiple Q-matrices, the number of items in each Q-matrix is specified as a
-vector of length \code{T}. For example, if there are three time points, and the Q-matrices for each
-time point have 8, 10, and 12 items, respectively, then \code{num.items = c(8, 10, 12)}. Default is an
-empty vector to indicate there is only one Q-matrix.}
+\item{num.q.matrix}{An optional integer specifying the number of Q-matrices. For many applications, the same assessment is administered at each time point and this number is 1 (the default). If there are different Q-matrices for each time point, then this argument must be specified and should be equal to the number of time points. For example, if there are three time points, and the Q-matrices for each time point are different, then \code{num.q.matrix = 3}. If there are three time points, and the Q-matrix is different only for time point 3, then \code{num.q.matrix} is still specified as \code{3}.}
 
-\item{anchor}{When there are different tests at each time point, this optional anchor argument is
-a vector of pairs of item numbers indicating which items are the same across time points and
-should be held invariant. For example, if there are three Q-matrices with 10 items each, and
-Items 1, 11, and 21 are the same, and Items 14 and 24 are the same, then
-\code{anchor = c(1,11,1,21,14,24)}. Default is an empty vector to indicate there is only one
-Q-matrix.}
+\item{num.items}{An integer specifying the number of items. When there are multiple Q-matrices, the number of items in each Q-matrix is specified as a vector. For example, if there are three time points, and the Q-matrices for each time point have 8, 10, and 12 items, respectively. Then \code{num.items = c(8, 10, 12)}.}
 
-\item{progress}{logical. If \code{FALSE} An optional logical indicating whether the function should
-print the progress of estimation.}
+\item{anchor}{An optional \code{vector} specifying how items are linked across time points to maintain item invariance when different tests are administered. By default, \code{anchor} is an empty \code{vector}, indicating the absence of anchor items. \strong{Note:} When \code{anchor} is specified, invariance is automatically set to \code{FALSE} for non-anchor items. Each pair in the \code{anchor} vector consists of a \strong{reference item} and a \strong{linked item}, where the linked item is mapped to its corresponding reference item. The reference item does not necessarily appear in the first test; it can be from any time point.
+
+\strong{Example:}
+Suppose we have three different 10-item tests with their corresponding Q-matrices. However, some items remain the same across time points:
+\itemize{
+\item \strong{Item 1} (from the first test), \strong{Item 11} (from the second test), and \strong{Item 21} (from the third test) correspond to the same item. Since \strong{Item 1} serves as the reference, \strong{Items 11} and \strong{21}  can be linked to it using: \code{anchor = c(1, 11, 1, 21)}
+\item If we additionally assume that \strong{Item 14} (from the second test) and \strong{Item 24} (from the third test) correspond to the same item, \strong{Item 14} serves as the reference, and \strong{Item 24} is linked to it. Thus, the final anchor vector is specified as: \code{anchor = c(1, 11, 1, 21, 14, 24)}
+}}
+
+\item{forget.att}{An optional vector allowing for constraining of individual attribute proficiency loss, or forgetting.
+\itemize{
+\item By default, forgetting is allowed for all measured attributes, meaning that probability of transitioning from mastery to non-mastery can be different than zero (\eqn{P(1 \rightarrow 0) \neq 0}).
+\item If a vector of attributes is provided, \eqn{P(1 \rightarrow 0) = 0} for those specific attributes, meaning that forgetting is not permitted. For example, if \code{forget.att= c(2,4)}, then forgetting for Attributes 2 and 4 is not allowed, while other attributes can exhibit forgetting.
+}}
+
+\item{progress}{logical. If \code{FALSE}, the function will print the progress of estimation. If \code{TRUE} (default), no progress information is printed.}
 }
 \value{
-An object of class \code{gdina} with entries as described in \code{\link[CDM:gdina]{CDM::gdina()}}. To see a
-TDCM-specific summary of the object (e.g., growth, transitions), use \code{\link[=tdcm.summary]{tdcm.summary()}}.
+An object of class \code{gdina} with entries as described in \code{\link[CDM:gdina]{CDM::gdina()}}. To see a TDCM-specific summary of the object (e.g.,growth, transitions), use \code{\link[=tdcm.summary]{tdcm.summary()}}.
 }
 \description{
-\code{tdcm()} is used to estimate the transition diagnostic classification model (TDCM; Madison &
-Bradshaw, 2018a), which is a longitudinal extension of the log-linear cognitive diagnosis model
-(LCDM; Henson, Templin, & Willse, 2009). It allows for the specification of many specific DCMs
-via the \code{rule} option. For the multigroup TDCM, see \code{\link[=mg.tdcm]{mg.tdcm()}}.
+\code{tdcm()} estimates the transition diagnostic classification model (TDCM; Madison & Bradshaw, 2018a), which is a longitudinal extension of the log-linear cognitive diagnosis model (LCDM; Henson, Templin, & Willse, 2009). For the multigroup TDCM, see \code{\link[=mg.tdcm]{mg.tdcm()}}. This function supports the estimation of various longitudinal DCMs by allowing different rule specifications via the \code{rule} option and link functions via the \code{linkfct} option, with LCDM as the default rule and link function. The rule can be modified to estimate the DINA model, DINO model, CRUM (i.e., ACDM, or main effects model), or reduced interaction versions of the LCDM. Additionally, the link function can be adjusted to specify the GDINA model.
 }
 \details{
-Estimation of the TDCM via the \pkg{CDM} package (George, et al., 2016), which is based on an
-EM algorithm as described in de la Torre (2011). The estimation approach is further detailed in
-Madison et al. (2023).
+\strong{Transition Diagnostic Classification Model (TDCM)}
+
+TDCM is a confirmatory and constrained latent transition model that measures examinees' growth or decline in attribute mastery over time (Madison & Bradshaw, 2018a). Assume that \eqn{X_{eit}} corresponds to the binary response of examinee \eqn{e \in \{1, \dots, N\}} to item \eqn{i \in \{1, \dots, I\}} across time points \eqn{t \in \{1, \dots, T\}}, and \eqn{A_t} denotes the number of attributes measured at time \eqn{t}.
+The probability of the item response vector \eqn{X_e = (x_{e11}, x_{e12}, \dots, x_{e1I}, x_{e21}, \dots, x_{eTI})} is given by:
+
+\deqn{
+P(X_e = x_e) = \sum_{c_1=1}^{C} \sum_{c_2=1}^{C} \cdots \sum_{c_T=1}^{C}
+v_{c_1} \tau_{c_2 | c_1} \tau_{c_3 | c_2} \cdots \tau_{c_T | c_{T-1}}
+\prod_{t=1}^{T} \prod_{i=1}^{I} \pi_{i c_t}^{x_{eit}} (1 - \pi_{i c_t})^{1 - x_{eit}},
+}
+
+where:
+\itemize{
+\item \eqn{v_{c_1}} represents the probability of belonging to attribute profile \eqn{c} at time 1.
+\item \eqn{\tau_{c_t | c_{t-1}}} represents the probability of transitioning attribute profiles from time point \eqn{t-1} to time point \eqn{t}.
+\item \eqn{\pi_{ic_t}} is the item response function, which models the probability of answering item \eqn{i} correctly at time \eqn{t} given attribute profile \eqn{c}.
+}
+
+\strong{Model Assumptions and Variations}
+
+\strong{1. Accounting for Measurement Invariance}
+
+Measurement invariance indicates whether the \strong{item response function} remains \strong{consistent over time} or changes across time points. Depending on the testing conditions, different measurement invariance assumptions can be assumed:
+\subsection{\strong{a) No Measurement Invariance}}{
+\itemize{
+\item If measurement invariance is \strong{not} assumed, each item has a \strong{different} response function over time: \eqn{\pi_{i c_1} \neq \pi_{i c_2} \neq \dots \neq \pi_{i c_T}}. Thus, the probability of the item response vector is:
+}
+
+\deqn{
+P(X_e = x_e) = \sum_{c_1=1}^{C} \sum_{c_2=1}^{C} \cdots \sum_{c_T=1}^{C}
+v_{c_1} \tau_{c_2 | c_1} \tau_{c_3 | c_2} \cdots \tau_{c_T | c_{T-1}}
+\prod_{t=1}^{T} \prod_{i=1}^{I} \pi_{i c_t}^{x_{eit}} (1 - \pi_{i c_t})^{1 - x_{eit}},
+}
+
+and
+\deqn{
+  \pi_{ic_t} = P(X_{ic_t} = 1|\alpha_{c_t}) = \frac{exp(\lambda_{i,0}+
+  \boldsymbol{\lambda_{i}^{(t)T}}
+  \boldsymbol{h(\alpha_{c_t}, q_i^{(t)})})}{1 + exp(\lambda_{i,0}+
+  \boldsymbol{\lambda_{i}^{(t)T}} \boldsymbol{h(\alpha_{c_t}, q_i^{(t)})})},
+   }
+
+where:
+\itemize{
+\item \eqn{q_i^{(t)}} is the q-matrix for item \eqn{i} at time point \eqn{t}.
+\item \eqn{\lambda_{i,0}} is the intercept parameter for item \eqn{i} and corresponds to the logit of a correct response when none of the attributes in the Q-matrix are mastered.
+\item \eqn{\boldsymbol{\lambda_i}^{(t)}} is a column vector of main and interaction effects for item \eqn{i} at time point \eqn{t}.
+\item \eqn{\boldsymbol{h(\alpha_{c_t}, q_i^{(t)})}} is a function mapping the attribute profile \eqn{\alpha_{c_t}} and the Q-matrix for item \eqn{i} at time point \eqn{t}.
+}
+}
+
+\subsection{\strong{b) Full Measurement Invariance}}{
+
+If measurement invariance \strong{is} assumed (default option), items maintain a \strong{constant response function across time}: \eqn{\forall i \in I, \pi_{i c_1}=\pi_{i c_2} = \dots = \pi_{i c_T}}, \eqn{\forall t \in T}. Therefore, the probability of the item response vector simplifies the to:
+
+\deqn{
+P(X_e = x_e) = \sum_{c_1=1}^{C} \sum_{c_2=1}^{C} \cdots \sum_{c_T=1}^{C}
+v_{c_1} \tau_{c_3 | c_2} \cdots \tau_{c_T | c_{T-1}}
+\prod_{t=1}^{T} \prod_{i=1}^{I} \pi_{i c}^{x_{eit}} (1 - \pi_{i c})^{1 - x_{eit}},
+}
+
+and
+\deqn{
+  \pi_{ic} = P(X_{ic} = 1|\alpha_{c}) = \frac{exp(\lambda_{i,0}+
+  \boldsymbol{\lambda_{i}^T}
+  \boldsymbol{h(\alpha_{c}, q_i)})}{1 + exp(\lambda_{i,0}+
+  \boldsymbol{\lambda_{i}^T} \boldsymbol{h(\alpha_{c}, q_i)})},
+   }
+
+where:
+\itemize{
+\item \eqn{q_i} is the Q-matrix for item \eqn{i}. Recall that as item are the same across time points and measurement invariance is assumed, the Q-matrix should also remain the same across time.
+\item \eqn{\lambda_{i,0}} is the intercept parameter for item \eqn{i}.
+\item \eqn{\boldsymbol{h(\alpha_{c_t}, q_i)}} is a function mapping the attribute profile \eqn{\alpha_{c}} and the item Q-matrix.
+}
+}
+
+\subsection{\strong{c) Partial Measurement Invariance}}{
+
+When measurement invariance is \strong{partially} assumed, some items (anchor items) maintain the same item response function across time points, while others (non-anchor items) vary over time.
+
+Assume that \eqn{i \in B} are \strong{anchor items}, such that \eqn{\forall i \in B, \forall t \in T, \pi_{i c_1}=\pi_{i c_2} = \dots = \pi_{i c_T}}. This implies that anchor items measure the same attributes across time and their corresponding Q-matrix entries remain unchanged.
+
+Assume also that \eqn{i \in Z} are \strong{non-anchor items}, such that \eqn{\forall i \in Z, \forall t \in \{2, \dots, T\}, \pi_{i c_t} \neq \pi_{i c_{t-1}}}. This means that non-anchor items may change across time or measure different attributes, leading to changes in their corresponding Q-matrix entries. Then, the probability of the item response vector is:
+
+\deqn{
+P(X_e = x_e) = \sum_{c_1=1}^{C} \sum_{c_2=1}^{C} \cdots \sum_{c_T=1}^{C}
+v_{c_1} \tau_{c_2 | c_1} \tau_{c_3 | c_2} \cdots \tau_{c_T | c_{T-1}}
+\prod_{t=1}^{T} \prod_{i \in B} \pi_{i c}^{x_{eit}} (1 - \pi_{i c})^{1 - x_{eit}}
+\prod_{t=1}^{T} \prod_{i \in Z} \pi_{i c_t}^{x_{eit}} (1 - \pi_{i c_t})^{1 - x_{eit}}.
+}
+}
+
+\subsection{\emph{2. Modeling Forgetting in Attribute Transitions}}{
+
+Unlike standard latent transition models that assume monotonic learning,TDCM allows for \strong{both mastery acquisition and forgetting}. By default, TDCM does not impose that mastery must always increase over time. Instead, the transition probabilities \eqn{\tau_{c_t | c_{t-1}}} for examinee \eqn{e} can represent a transition from:
+\itemize{
+\item A transition from non-mastery status to master attribute status (learning).
+\item A transition from master attribute status to a non-mastery status (forgetting).
+}
+
+However, TDCM also allows for attribute-specific constrains, enabling to restrict transition probabilities for certain attributes.
+
+\strong{3. Special Cases}
+
+In TDCM, the item response function \eqn{\pi_{ic_{t}}} is parameterized using the LCDM. LCDM is a general and flexible model that allows special models to be derived by constraining specific parameters.
+}
+
+\subsection{\strong{DINA Model}}{
+
+The DINA model is a non-compensatory DCM, meaning that examinees can correctly answer to an item only if they have mastered all attributes required by that item. Given this characteristic, the DINA model is derived by constraining the main effects of the LCDM to zero, such that only the highest-order interaction term influences the item response probability.
+\subsection{\emph{Example}}{
+
+Suppose item 1 measures Attributes 1 and 2, and item invariance is assumed across time points.
+The item response function for item 1 following the LCDM can be expressed as:
+
+\deqn{
+\pi_{1c} = P(X_{1c} = 1|\alpha_{c}) = \frac{exp(\lambda_{1,0}+
+\lambda_{1,1(1)}\alpha_{c1} + \lambda_{1,1(2)}\alpha_{c2} + \lambda_{1,2(1,2)}\alpha_{c1}\alpha_{c2})}{1 + exp(\lambda_{1,0}+
+\lambda_{1,1(1)}\alpha_{c1} + \lambda_{1,1(2)}\alpha_{c2} + \lambda_{1,2(1,2)}\alpha_{c1}\alpha_{c2})},
+}
+
+Then, the DINA model is obtained by constraining the LCDM main effects to zero, resulting in:
+
+\deqn{
+\pi_{1c} = P(X_{1c} = 1|\alpha_{c}) = \frac{exp(\lambda_{1,0}+
+\lambda_{1,2(1,2)}\alpha_{c1}\alpha_{c2})}{1 + exp(\lambda_{1,0}+
+\lambda_{1,2(1,2)}\alpha_{c1}\alpha_{c2})}.
+}
+}
+
+}
+
+\subsection{\strong{DINO Model}}{
+
+The DINO model is a compensatory DCM, meaning that examinees can correctly answer an item if they have mastered at least one of the attributes required by that item. Consequently, the main and interaction terms in the LCDM are constrained to be equal, and we subtract the interaction term to ensure the item response probability remains unchanged when multiple attributes are mastered. Following the previous example, the DINO model can be expressed as:
+
+\deqn{
+\pi_{1c} = P(X_{1c} = 1|\alpha_{c}) = \frac{exp(\lambda_{1,0}+
+(\lambda_{1,1(1)}\alpha_{c1} + \lambda_{1,1(2)}\alpha_{c2} - \lambda_{1,2(1,2)}\alpha_{c1}\alpha_{c2}))}{1 + exp(\lambda_{1,0}+
+(\lambda_{1,1(1)}\alpha_{c1} + \lambda_{1,1(2)}\alpha_{c2} - \lambda_{1,2(1,2)}\alpha_{c1}\alpha_{c2}))}.
+}
+}
+
+\subsection{\strong{CRUM Model}}{
+
+The CRUM is a compensatory DCM where each attribute independently contributes to the probability of a correct response. Unlike the DINO model, mastering multiple attributes neither penalizes nor provides an additional advantage. Thus, the probability of a correct response is determined solely by the sum of individual main effects, constraining the interaction term to zero.
+
+Following the previous example, the CRUM model can be expressed as:
+
+\deqn{
+\pi_{1c} = P(X_{1c} = 1|\alpha_{c}) = \frac{exp(\lambda_{1,0}+
+\lambda_{1,1(1)}\alpha_{c1} + \lambda_{1,1(2)}\alpha_{c2} )}{1 + exp(\lambda_{1,0}+
+\lambda_{1,1(1)}\alpha_{c1} + \lambda_{1,1(2)}\alpha_{c2} )}.
+}
+
+\strong{Estimation methods}
+
+Estimation of the TDCM via the \pkg{CDM} package (George, et al., 2016), which is based on an EM algorithm as described in de la Torre (2011). The estimation approach is further detailed in Madison et al. (2023).
+}
 }
 \examples{
 \donttest{
-## Example 1: T = 2, A = 4
+
+############################################################################
+# Example 1: TDCM with full measurement invariance
+############################################################################
+
+# Load dataset: T=2, A=4
+data(data.tdcm01, package = "TDCM")
+data <- data.tdcm01$data
+q.matrix <- data.tdcm01$q.matrix
+# Estimate model
+model1 <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                    rule = "LCDM", num.q.matrix = 1)
+# Summarize results with tdcm.summary().
+results <- TDCM::tdcm.summary(model1)
+results$item.parameters
+results$growth
+results$growth.effects
+results$transition.probabilities
+
+#############################################################################
+# Example 2: TDCM with no measurement invariance
+############################################################################
+
+# Load dataset: T=2, A=4
+data(data.tdcm01, package = "TDCM")
+data <- data.tdcm01$data
+q.matrix <- data.tdcm01$q.matrix
+# Estimate model
+model2 <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = FALSE,
+                    rule = "LCDM", num.q.matrix = 1)
+# Summarize results with tdcm.summary().
+results2 <- TDCM::tdcm.summary(model2)
+results2$item.parameters
+results2$growth
+results2$growth.effects
+results2$transition.probabilities
+
+
+#############################################################################
+# Example 3: TDCM with different Q-matrices for each time point and no
+# anchor items
+############################################################################
+
+# Load dataset: T=3, A=2
+data(data.tdcm03, package = "TDCM")
+data <- data.tdcm03$data
+q1 <- data.tdcm03$q.matrix.1
+q2 <- data.tdcm03$q.matrix.2
+q3 <- data.tdcm03$q.matrix.3
+q <- data.tdcm03$q.matrix.stacked
+
+# Estimate model
+model3 <- TDCM::tdcm(data, q, num.time.points = 3, rule = "LCDM",
+                    num.q.matrix = 3, num.items = c(10, 10, 10))
+
+#----------------------------------------------------------------------------
+# Summarize results with tdcm.summary() for more than 2 time points.
+#----------------------------------------------------------------------------
+
+## There are three post hoc approaches to summarize the transition probabilities
+## for each attribute across time using the tdcm.summary() function.
+## Each of them is illustrated below.
+
+## 1. When the transition.option argument in the tdcm.summary() is not specified,
+## the function assumes by default that transition.option = 1.
+## Thus, when summarizing the transition probabilities
+## you will compare the results for the first and last time point.
+
+### Summary with default option
+
+results3_def_transition <- TDCM::tdcm.summary(model3)
+results3_def_transition$transition.probabilities
+#, , Attribute 1: Time 1 to Time 3
+#
+#       T3 [0] T3 [1]
+#T1 [0]  0.202  0.798
+#T1 [1]  0.146  0.854
+#
+#, , Attribute 2: Time 1 to Time 3
+#
+#       T3 [0] T3 [1]
+#T1 [0]  0.325  0.675
+#T1 [1]  0.257  0.743
+
+## 2. When the transition.option = 2, you can compare the transition probabilities
+## from the first time point to every other time point. In this case, you can
+## compare the transition probabilities between Time Point 1 and Time Point 2,
+## and Time Point 1 with Time Point 3.
+
+### Summary with transition.option = 2
+results3_2transition <- TDCM::tdcm.summary(model3, transition.option = 2)
+results3_2transition$transition.probabilities
+#, , Attribute 1: Time 1 to Time 2
+#
+#.    [0]   [1]
+#[0] 0.510 0.490
+#[1] 0.424 0.576
+#
+#, , Attribute 2: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.456 0.544
+#[1] 0.334 0.666
+#
+#, , Attribute 1: Time 1 to Time 3
+#
+#     [0]   [1]
+#[0] 0.202 0.798
+#[1] 0.146 0.854
+#
+#, , Attribute 2: Time 1 to Time 3
+#
+#     [0]   [1]
+#[0] 0.325 0.675
+#[1] 0.257 0.743
+
+## 3. When the transition.option = 3, you can compare the transition probabilities
+## sequentially, such that for each attribute, you can compare the transition
+## probabilities between Time Point 1 and Time Point 2, Time Point 2 and Time Point 3
+
+### Summary with transition.option = 3
+results3_3transition <- TDCM::tdcm.summary(model3, transition.option = 3)
+results3_3transition$transition.probabilities
+#, , Attribute 1: Time 1 to Time 2
+#
+#    [0]   [1]
+#[0] 0.510 0.490
+#[1] 0.424 0.576
+#
+#, , Attribute 2: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.456 0.544
+#[1] 0.334 0.666
+#
+#, , Attribute 1: Time 2 to Time 3
+#
+#     [0]   [1]
+#[0] 0.183 0.817
+#[1] 0.188 0.812
+#
+#, , Attribute 2: Time 2 to Time 3
+#
+#     [0]   [1]
+#[0] 0.361 0.639
+#[1] 0.262 0.738
+
+#############################################################################
+# Example 4: Full TDCM with different Q-matrices for each time point and
+# anchor items
+############################################################################
+
+# Load dataset: T=3, A=2
+data <- data.tdcm03$data
+q1 <- data.tdcm03$q.matrix.1
+q2 <- data.tdcm03$q.matrix.2
+q3 <- data.tdcm03$q.matrix.3
+q <- data.tdcm03$q.matrix.stacked
+## Estimate model
+## Anchor items:
+## - item 1, item 11, and item 21 are the same
+## - item 14 and item 24 are the same.
+
+model4 <- TDCM::tdcm(data, q, num.time.points = 3, rule = "LCDM",
+                    num.q.matrix = 3, anchor = c(1,11,
+                                                 1,21,
+                                                 14,24),
+                    num.items = c(10, 10, 10))
+
+# Summarize results with tdcm.summary().
+results4 <- TDCM::tdcm.summary(model4)
+results4$item.parameters
+results4$growth
+results4$growth.effects
+results4$transition.probabilities
+
+#----------------------------------------------------------------------------
+#Compare models from example 3 and 4 to assess measurement invariance
+#----------------------------------------------------------------------------
+
+## Additionally, we can measure the measurement invariance between a TDCM model
+## that assumes full measurement invariance (model3) and a model that assumes partial
+## measurement invariance (model4)
+
+model_comparison <- tdcm.compare(model3, model4)
+
+
+#############################################################################
+# Example 5: DINA TDCM with full measurement invariance
+############################################################################
+
+# Load dataset: T=2, A=4
 data(data.tdcm01, package = "TDCM")
 data <- data.tdcm01$data
 q.matrix <- data.tdcm01$q.matrix
 
-# Estimate full TDCM with invariance assumed.
-model1 <- TDCM::tdcm(data, q.matrix, num.time.points = 2)
+# Estimate model
+model5 <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                    rule = "DINA", num.q.matrix = 1)
+# Summarize results with tdcm.summary().
+results5 <- TDCM::tdcm.summary(model5)
+results5$item.parameters
+results5$growth
+results5$growth.effects
+results5$transition.probabilities
+
+#############################################################################
+# Example 6: DINO TDCM with full measurement invariance
+############################################################################
+
+# Load dataset: T=2, A=4
+data(data.tdcm01, package = "TDCM")
+data <- data.tdcm01$data
+q.matrix <- data.tdcm01$q.matrix
+
+# Estimate model
+model6 <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                    rule = "DINO", num.q.matrix = 1)
+# Summarize results with tdcm.summary().
+results6 <- TDCM::tdcm.summary(model6)
+results6$item.parameters
+results6$growth
+results6$growth.effects
+results6$transition.probabilities
+
+#############################################################################
+# Example 7: CRUM TDCM with full measurement invariance
+############################################################################
+
+# Load dataset: T=2, A=4
+data(data.tdcm01, package = "TDCM")
+data <- data.tdcm01$data
+q.matrix <- data.tdcm01$q.matrix
+
+# Estimate model
+model7 <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                    rule = "CRUM", num.q.matrix = 1)
+# Summarize results with tdcm.summary().
+results7 <- TDCM::tdcm.summary(model7)
+results7$item.parameters
+results7$growth
+results7$growth.effects
+results7$transition.probabilities
+
+#############################################################################
+# Example 8: RRUM TDCM with full measurement invariance
+############################################################################
+
+# Load dataset: T=2, A=4
+data(data.tdcm01, package = "TDCM")
+data <- data.tdcm01$data
+q.matrix <- data.tdcm01$q.matrix
+
+# Estimate model
+model8 <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                    rule = "RRUM", num.q.matrix = 1)
+# Summarize results with tdcm.summary().
+results8 <- TDCM::tdcm.summary(model8)
+results8$item.parameters
+results8$growth
+results8$growth.effects
+results8$transition.probabilities
+
+#############################################################################
+# Example 9: TDCM with and without forgetting
+############################################################################
+
+# Load dataset: T=2, A=4,
+data(data.tdcm01, package = "TDCM")
+data <- data.tdcm01$data
+q.matrix <- data.tdcm01$q.matrix
+
+##----------------------------------------------------------------------------
+# With forgetting
+#----------------------------------------------------------------------------
+## Consider a default model in which students can retain or lose their mastery status
+## from one time point to another
+
+# Estimate the model
+model11_forgetting <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                                rule = "LCDM", num.q.matrix = 1)
 
 # Summarize results with tdcm.summary().
-results <- TDCM::tdcm.summary(model1, num.time.points = 2)
-results$item.parameters
-results$growth
-results$transition.probabilities
+results_forgetting <- TDCM::tdcm.summary(model11_forgetting, transition.option = 3)
+results_forgetting$transition.probabilities
+
+#, , Attribute 1: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.680 0.320
+#[1] 0.417 0.583
+#
+#, , Attribute 2: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.581 0.419
+#[1] 0.353 0.647
+#
+#, , Attribute 3: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.549 0.451
+#[1] 0.221 0.779
+#
+#, , Attribute 4: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.371 0.629
+#[1] 0.104 0.896
+
+##----------------------------------------------------------------------------
+# Without forgetting
+#----------------------------------------------------------------------------
+## Consider a model in which students cannot lose their mastery status for Attribute 4
+## from one time point to another.
+
+# Estimate the model
+model11_noforgetting <- TDCM::tdcm(data, q.matrix, num.time.points = 2, invariance = TRUE,
+                                  rule = "LCDM", num.q.matrix = 1, forget.att = c(4))
+
+# Summarize results with tdcm.summary().
+results_noforgetting <- TDCM::tdcm.summary(model11_noforgetting, transition.option = 3)
+results_noforgetting$transition.probabilities
+
+#, , Attribute 1: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.678 0.322
+#[1] 0.416 0.584
+#
+#, , Attribute 2: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.578 0.422
+#[1] 0.359 0.641
+#
+#, , Attribute 3: Time 1 to Time 2
+#
+#     [0]   [1]
+#[0] 0.546 0.454
+#[1] 0.226 0.774
+#
+#, , Attribute 4: Time 1 to Time 2
+#
+#      [0]   [1]
+#[0] 0.382 0.618
+#[1] 0.000 1.000
+
 }
 }
 \references{
-de la Torre, J. (2011). The generalized DINA model framework. \emph{Psychometrika}, 76, 179-199.
+de la Torre, J. (2011). The Generalized DINA model framework. \emph{Psychometrika, 76}, 179–199.
+\url{doi:10.1007/s11336-011-9207-7}.
 
-George, A. C., Robitzsch, A., Kiefer, T., Gross, J., & Ünlü , A. (2016). The R package CDM for
-cognitive diagnosis models. \emph{Journal of Statistical Software}, 74(2), 1-24.
+George, A. C., Robitzsch, A., Kiefer, T., Gross, J., & Ünlü , A. (2016). The \emph{R} package \strong{CDM}
+for cognitive diagnosis models. \emph{Journal of Statistical Software,74}(2), 1-24.
+\url{doi:10.18637/jss.v074.i02}
 
 Henson, R., Templin, J., & Willse, J. (2009). Defining a family of cognitive diagnosis models
-using log linear models with latent variables. \emph{Psychometrika}, 74, 191-21.
+using log-linear models with latent variables. \emph{Psychometrika, 74}, 191-21.
+\url{doi:10.1007/s11336-008-9089-5}.
+
+Johnson, M. S., & Sinharay, S. (2020). The reliability of the posterior probability of skill
+attainment in diagnostic classification models. \emph{Journal of Educational Measurement, 47}(1),
+5–31. \url{doi:10.3102/1076998619864550}.
+
+Kaya, Y., & Leite, W. (2017). Assessing change in latent skills across time With longitudinal
+cognitive diagnosis modeling: An evaluation of model performance.
+\emph{Educational and Psychological Measurement, 77}(3), 369–388.
+\url{doi:10.1177/0013164416659314}.
+
+Li, F., Cohen, A., Bottge, B., & Templin, J. (2015). A latent transition analysis model for
+assessing change in cognitive skills. \emph{Educational and Psychological Measurement, 76}(2),
+181–204.
+\url{doi:10.1177/0013164415588946}.
+
+Madison, M. J. (2019). Reliably assessing growth with longitudinal diagnostic classification
+models. \emph{Educational Measurement: Issues and Practice, 38}(2), 68-78.
+\url{doi:10.1111/emip.12243}.
 
 Madison, M. J., & Bradshaw, L. (2018a). Assessing growth in a diagnostic classification model
-framework. \emph{Psychometrika}, 82(4), 963-990.
+framework. \emph{Psychometrika, 83}(4), 963-990.
+\url{doi:10.1007/s11336-018-9638-5}.
 
 Madison, M. J., & Bradshaw, L. (2018b). Evaluating intervention effects in a diagnostic
-classification model framework. \emph{Journal of Educational Measurement}, 55(1), 32-51.
+classification model framework. \emph{Journal of Educational Measurement, 55}(1), 32-51.
+\url{doi:10.1111/jedm.12162}.
 
-Madison, M.J., Chung, S., Kim, J., & Bradshaw, L. (2024). Approaches to estimating longitudinal
-diagnostic classification models. \emph{Behaviormetrika}, 51, 7-19.
-https://doi.org/10.1007/s41237-023-00202-5
+Madison, M.J., Chung, S., Kim, J., & Bradshaw, L.P. (2024) Approaches to estimating longitudinal
+diagnostic classification models. \emph{Behaviormetrika, 51}(7), 7-19.
+\url{doi:10.1007/s41237-023-00202-5}.
+
+Madison, M. J., Jeon, M., Cotterell, M., Haab, S., & Zor, S. (2025). TDCM: An R package for estimating
+longitudinal diagnostic classification models. \emph{Multivariate Behavioral Research}, 1–10.
+\url{doi:10.1080/00273171.2025.2453454}.
+
+Ravand, H., Effatpanah, F., Kunina-Habenicht, O., & Madison, M. J. (2025). A didactic illustration
+of writing skill growth through a longitudinal diagnostic classification model. \emph{Frontiers in Psychology}.
+\url{doi:10.3389/fpsyg.2024.1521808}.
 
 Rupp, A. A., Templin, J., & Henson, R. (2010).
 \emph{Diagnostic Measurement: Theory, Methods, and Applications}. New York: Guilford.
+ISBN: 9781606235430.
+
+Schellman, M., & Madison, M. J. (2024). Estimating the reliability of skill transition in longitudinal DCMs.
+\emph{Journal of Educational and Behavioral Statistics}.\url{doi:10.3102/10769986241256032}.
+
+Templin, J., & Bradshaw, L. (2013). Measuring the reliability of diagnostic classification model
+examinee estimates. \emph{Journal of Classification, 30}, 251-275.
+\url{doi:10.1007/s00357-013-9129-4}.
+
+Wang. S., Yang. Y., Culpepper, S. A., & Douglas, J. (2018). Tracking skill acquisition with
+cognitive diagnosis models: A higher-order, hidden Markov model With covariates.
+\emph{Journal of Educational and Behavioral Statistics, 43}(1), 57-87.
+\url{doi:10.3102/1076998617719727}.
 }

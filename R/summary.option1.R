@@ -75,10 +75,34 @@ summary.option1 <- function(model, num.atts, num.time.points, attribute.names) {
     matrix.names.trans <- c(matrix.names.trans, temp.name) # Combines matrix names into list
   }
 
+  #Growth effect sizes
+  growth.effects <- matrix(NA, num.atts, 5)
+  growth.effects[, 1] <- growth[, 1] #T1 proportion
+  growth.effects[, 2] <- growth[, num.time.points] #Tk proportion
+
+  #growth = difference
+  diff <- growth[, num.time.points] - growth[, 1]
+  growth.effects[, 3] <-  diff
+
+  #odds ratio
+  or1 <- growth[, num.time.points] / (1 - growth[, num.time.points])
+  or2 <- growth[, 1] / (1 -growth[, 1])
+  growth.effects[, 4] <- round(or1 / or2, 2)
+
+  #Cohen's h: arcsin difference in proportions
+  ar1 <- 2 * asin(sqrt(growth[, num.time.points]))
+  ar2 <- 2 * asin(sqrt(growth[, 1]))
+  growth.effects[, 5] <- round(ar1 - ar2, 2)
+  colnames(growth.effects) <- c("T1[1]", paste("T", num.time.points,"[1]", sep=""),
+                                 "Growth", "Odds Ratio", "Cohen`s h")
+
   if (length(attribute.names) == A) {
     dimnames(growth) <- list(attribute.names, cnames.growth)
+    rownames(growth.effects) <- attribute.names
   } else {
     dimnames(growth) <- list(rnames.growth, cnames.growth)
+    rownames(growth.effects) <- rnames.growth
+
   }
 
   dimnames(trans) <- list(trans.rnames, trans.cnames, matrix.names.trans)
@@ -95,6 +119,11 @@ summary.option1 <- function(model, num.atts, num.time.points, attribute.names) {
     rel <- tdcm.rel(model, num.atts, num.time.points, transition.option = transition.option)
   }
 
-  newlist1 <- list("trans" = trans, "growth" = growth, "rel" = rel)
+
+
+
+
+  newlist1 <- list("trans" = trans, "growth" = growth,
+                   "growth.effects" = growth.effects,  "rel" = rel)
   return(newlist1)
 }

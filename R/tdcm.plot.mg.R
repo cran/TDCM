@@ -76,4 +76,7 @@ tdcm.plot.mg <- function(results, attribute.names = c(), group.names = c()) {
       graphics::text(x = (numtime * (j - 1) + (j - 1) * 1) + 1:numtime + .5, y = growth[i, , j] / 2, labels = round(growth[i, , j], 2), cex = 1.1)
     }
   } # end attribute loop
+
+  print("**Check the plots window for line and bar plots for group growth proportions.", quote = FALSE)
+
 }

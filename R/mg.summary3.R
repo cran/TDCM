@@ -12,9 +12,12 @@ mg.summary3 <- function(model, num.atts, num.groups, num.time.points, attribute.
   transition.option <- 3
   A <- num.atts
 
-  # create matrices to store growth and trans probality matrices for each group
+  # create matrices to store growth and trans probability matrices for each group
   all.growth <- array(NA, dim = c(num.atts, num.time.points, num.groups))
   all.trans <- array(NA, dim = c(2, 2, num.atts * (num.time.points - 1), num.groups))
+  growth.effects <- array(NA, dim = c(num.atts, 3, (num.time.points - 1), num.groups))
+  g.cnames <- c("Growth", "Odds Ratio", "Cohen`s h")
+
 
   for (g in 1:num.groups) {
     growth <- matrix(NA, num.atts, num.time.points)
@@ -34,15 +37,17 @@ mg.summary3 <- function(model, num.atts, num.groups, num.time.points, attribute.
       } # Creates temporary row name per iteration
       rnames.growth <- c(rnames.growth, temp.g.rname) # Combines row names into list
     }
-    matrix.names.growth <- c()
 
     trans <- array(NA, c(2, 2, num.atts * (num.time.points - 1))) # Creates an array of empty 2x2 matrices, one for each attribute
     trans.cnames <- c("[0]", "[1]")
     trans.rnames <- c("[0]", "[1]")
     matrix.names.trans <- c()
+    matrix.names.effects <- c()
 
-    for (t in 2:num.time.points) {
-      for (j in 1:num.atts) {
+    for (t in 2:num.time.points) { #open time point loop
+
+      for (j in 1:num.atts) { #open attribute loop
+
         initial.ind10 <- which(model$attribute.patt.splitted[, j] == 1 & model$attribute.patt.splitted[, j + ((t - 1) * num.atts)] == 0) # Repeat of transition.option = 2 stuff so that
         initial.ind11 <- which(model$attribute.patt.splitted[, j] == 1 & model$attribute.patt.splitted[, j + ((t - 1) * num.atts)] == 1) # first column accurately
         initial.sum10 <- sum(model$attribute.patt[initial.ind10, g]) # reflects baserate
@@ -76,42 +81,88 @@ mg.summary3 <- function(model, num.atts, num.groups, num.time.points, attribute.
 
         temp.name <- paste("Attribute ", j, ": Time ", (t - 1), " to Time ", t, sep = "") # Creates temporary name for each matrix
         matrix.names.trans <- c(matrix.names.trans, temp.name) # Combines matrix names into list
-      } # end time point loop
+
+        } # end time point loop
+
+      temp.name2 <- paste("Time ", (t - 1), " to Time ", t, sep = "") # Creates temporary name for each matrix
+      matrix.names.effects <- c(matrix.names.effects, temp.name2) # Combines matrix names into list
+
     } # end attribute loop
 
     all.growth[, , g] <- growth
     all.trans[, , , g] <- trans
+
   } # end group loop
 
   dimnames(all.trans) <- list(trans.rnames, trans.cnames, matrix.names.trans)
+  dimnames(growth.effects)[[3]] <- matrix.names.effects
+
+  #compute growth effects, successive
+  for(g in 1:num.groups){ #open group loop
+
+    for(t in 2:num.time.points){ #open time point loop
+
+      #growth = difference
+      diff = all.growth[, t, g] - all.growth[, t - 1, g]
+      growth.effects[ , 1, t - 1, g] <-  diff
+
+      #odd ratio
+      or1 <- (all.growth[, t, g]) / (1 - all.growth[, t, g])
+      or2 <- (all.growth[, t - 1, g]) / (1 - all.growth[, t - 1, g])
+      growth.effects[ , 2, t - 1, g] <- round(or1 / or2, 2)
+
+      #Cohen's h: arcsin difference in proportions
+      ar1 <- 2 * asin(sqrt(all.growth[, t, g]))
+      ar2 <- 2 * asin(sqrt(all.growth[, t - 1, g]))
+      growth.effects[ , 3, t - 1, g] <- round(ar1 - ar2, 2)
+
+    } #close time point loop
+
+  } #close group loop
+
+
 
   # give growth and transition matrices names
   if (length(attribute.names) == num.atts) {
+
     rownames(all.growth) <- attribute.names
+    rownames(growth.effects) <- attribute.names
+
   } else {
+
     rownames(all.growth) <- paste("Attribute", 1:num.atts, sep = " ")
+    rownames(growth.effects) <- paste("Attribute", 1:num.atts, sep = " ")
+
   }
+
   colnames(all.growth) <- cnames.growth
+  colnames(growth.effects) <- g.cnames
 
   if (length(group.names) == num.groups) {
+
     dimnames(all.growth)[[3]] <- group.names
+    dimnames(growth.effects)[[4]] <- group.names
     dimnames(all.trans)[[4]] <- group.names
+
   } else {
+
     dimnames(all.growth)[[3]] <- paste("Group", 1:num.groups, sep = " ")
+    dimnames(growth.effects)[[4]] <- paste("Group", 1:num.groups, sep = " ")
     dimnames(all.trans)[[4]] <- paste("Group", 1:num.groups, sep = " ")
+
   }
 
   # compute transition reliability
-  complexity <- num.atts * num.time.points * num.groups
-  if (complexity < 20) {
-    esttime <- round(stats::runif(1, 40, 60), 0)
-  } else {
-    esttime <- round(stats::runif(1, 30, 40), 0)
-  }
+  # complexity <- num.atts * num.time.points * num.groups
+  # if (complexity < 20) {
+  #   esttime <- round(stats::runif(1, 40, 60), 0)
+  # } else {
+  #   esttime <- round(stats::runif(1, 30, 40), 0)
+  # }
 
-  if (model$progress == TRUE) {
-    print(paste("Summarizing results, progress = ", esttime, "%...", sep = ""), quote = FALSE)
-  }
+  # if (model$progress == TRUE) {
+  #   print(paste("Summarizing results...", sep = ""), quote = FALSE)
+  # }
   if (length(attribute.names) == A) {
     rel <- tdcm.rel(model, num.atts, num.time.points,
                     transition.option = transition.option, attribute.names = attribute.names
@@ -120,6 +171,7 @@ mg.summary3 <- function(model, num.atts, num.groups, num.time.points, attribute.
     rel <- tdcm.rel(model, num.atts, num.time.points, transition.option = transition.option)
   }
 
-  newlist3 <- list("trans" = all.trans, "growth" = all.growth, "rel" = rel)
+  newlist3 <- list("trans" = all.trans, "growth" = all.growth,
+                   "growth.effects" = growth.effects,  "rel" = rel)
   return(newlist3)
 }

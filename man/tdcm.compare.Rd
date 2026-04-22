@@ -33,10 +33,10 @@ dat1 <- data.tdcm01$data
 qmat1 <- data.tdcm01$q.matrix
 
 # estimate TDCM with invariance assumed and full LCDM
-m1 <- TDCM::tdcm(dat1, qmat1, num.time.points = 2, invariance = TRUE, rule = "GDINA")
+m1 <- TDCM::tdcm(dat1, qmat1, num.time.points = 2, invariance = TRUE, rule = "LCDM")
 
 # estimate TDCM with invariance not assumed
-m2 <- TDCM::tdcm(dat1, qmat1, num.time.points = 2, invariance = FALSE, rule = "GDINA")
+m2 <- TDCM::tdcm(dat1, qmat1, num.time.points = 2, invariance = FALSE, rule = "LCDM")
 
 # compare models to assess measurement invariance.
 TDCM::tdcm.compare(m1, m2)

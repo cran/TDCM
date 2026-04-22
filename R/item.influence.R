@@ -93,15 +93,15 @@ item.influence <- function(model, data, fullcorrelation = FALSE, progress = TRUE
 
   #Simple Structure Only
   if (all(rowSums(Q) == 1)) {
-    pull0 <- as.numeric(round(t(pull0), 2)[!is.na(t(pull0))])
-    pull1 <- as.numeric(round(t(pull1), 2)[!is.na(t(pull1))])
+    pull0 <- as.numeric(round(t(pull0), 3)[!is.na(t(pull0))])
+    pull1 <- as.numeric(round(t(pull1), 3)[!is.na(t(pull1))])
     Pull <- data.frame(Item = 1:I, Attribute = max.col(Q), pull0, pull1)
   }
 
   #Complex Structure
   if (any(rowSums(Q) != 1)) {
-    pull0 <- round(pull0, 2)
-    pull1 <- round(pull1, 2)
+    pull0 <- round(pull0, 3)
+    pull1 <- round(pull1, 3)
     Pull <- data.frame(Item = 1:I, pull0, pull1)
   }
 
@@ -136,7 +136,7 @@ item.influence <- function(model, data, fullcorrelation = FALSE, progress = TRUE
 
   #Some cleanup
   override[!sapply(as.data.frame(Q), as.logical)] <- NA
-  override <- round(override, 2)
+  override <- round(override, 3)
   colnames(override) <- sprintf("Att%d", seq(1:J))
 
   #Simple Structure Only
@@ -171,7 +171,7 @@ item.influence <- function(model, data, fullcorrelation = FALSE, progress = TRUE
 
   #Clean up
   propinfo[!sapply(as.data.frame(Q), as.logical)] <- NA
-  propinfo <- round(propinfo, 2)
+  propinfo <- round(propinfo, 3)
   colnames(propinfo) <- sprintf("Att%d", seq(1:J))
 
   #Simple Structure Only
@@ -188,12 +188,12 @@ item.influence <- function(model, data, fullcorrelation = FALSE, progress = TRUE
   Results[[3]] <- propinfo
 
   #Correlation Descriptive of Responses with class
-  Correl1 <- round(stats::cor(data, originalclass), 2)
+  Correl1 <- round(stats::cor(data, originalclass), 3)
   rownames(Correl1) <- NULL
   colnames(Correl1) <- sprintf("Att%d", seq(1:J))
 
   #Correlation Descriptive of Responses with posterior
-  Correl2 <- round(stats::cor(data, postprobs), 2)
+  Correl2 <- round(stats::cor(data, postprobs), 3)
   rownames(Correl2) <- NULL
   colnames(Correl2) <- sprintf("Att%d", seq(1:J))
 

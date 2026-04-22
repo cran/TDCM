@@ -63,11 +63,20 @@ mg.summary.param1 <- function(model, num.time.points, num.atts, num.items) {
 
   s.parm <- matrix(NA, nrow = num.items, ncol = length(param.names1) + 1) # Creates appropriate empty matrix
   num.count <- nchar(gsub("\\D", "", param.names1)) # Counts the number of integers
-  parm.c.names <- c(paste0("\U03BB", 0)) # Sets first column name to lambda0
+
+  if(model$linkfct == "identity"){
+    parm.c.names <- c(paste0("\U03B4", 0)) # Sets first column name to delta0
+
+  } else {parm.c.names <- c(paste0("\U03BB", 0))} # Sets first column name to lambda0
+
   for (i in 1:(length(param.names1))) { # This loop goes from 2 to number of parameter names
     for (a in 1:num.atts) {
       if (num.count[i] == a) { # Essentially tells me how many attributes at a time
-        temp.name <- paste0("\U03BB", a, ",", gsub(", ", "", param.names1[i])) # Creates name lambda1,1 or lambda1,2, or lambda3,123
+
+        if(model$linkfct == "identity"){
+          temp.name <- paste0("\U03B4", a, ",", gsub(", ", "", param.names1[i]))
+        } else {temp.name <- paste0("\U03BB", a, ",", gsub(", ", "", param.names1[i]))
+        }
         parm.c.names <- c(parm.c.names, temp.name)
       } else {}
     }

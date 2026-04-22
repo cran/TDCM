@@ -4,7 +4,7 @@
 \alias{tdcm.plot}
 \title{Plotting TDCM Results}
 \usage{
-tdcm.plot(results, attribute.names = c(), group.names = c())
+tdcm.plot(results, attribute.names = c(), group.names = c(), type = "both")
 }
 \arguments{
 \item{results}{results from \code{\link{tdcm.summary}} or \code{\link{mg.tdcm.summary}}}
@@ -12,6 +12,10 @@ tdcm.plot(results, attribute.names = c(), group.names = c())
 \item{attribute.names}{an optional vector of attribute names to include in plots.}
 
 \item{group.names}{an optional vector of group names to include in plots.}
+
+\item{type}{an option to specify the type of plot in single group cases; "both" is default and
+will produce a line plot and a bar chart; "line" will produce a line plot;
+and "bar" will produce a bar chart.}
 }
 \value{
 No return value, called for side effects.
@@ -27,10 +31,10 @@ dat1 = data.tdcm01$data
 qmat1 = data.tdcm01$q.matrix
 
 #estimate TDCM with invariance assumed and full LCDM
-m1 = TDCM::tdcm(dat1, qmat1, num.time.points = 2, invariance = TRUE, rule = "GDINA")
+m1 = TDCM::tdcm(dat1, qmat1, num.time.points = 2, invariance = TRUE, rule = "LCDM")
 
 #summarize results with tdcm.summary function
-results1 = TDCM::tdcm.summary(m1, num.time.points = 2)
+results1 = TDCM::tdcm.summary(m1)
 
 #plot results
 TDCM::tdcm.plot(results1, attribute.names = c("Addition", "Subtraction",

@@ -1,5 +1,7 @@
 ## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(
+  comment = "", 
+  collapse = FALSE,
   dpi = 300,
   out.width = "100%"
 ) # set output options
@@ -28,7 +30,7 @@ model1 <- tdcm(data, q.matrix, num.time.points = 2)
 
 ## ----eval = TRUE--------------------------------------------------------------
 # Summarize the results
-results1 <- tdcm.summary(model1, num.time.points = 2, attribute.names = standards)
+results1 <- tdcm.summary(model1, attribute.names = standards)
 
 ## ----eval = TRUE--------------------------------------------------------------
 item.parameters <- results1$item.parameters
@@ -74,12 +76,12 @@ tdcm.compare(model1, model2)
 model3 <- tdcm(data, q.matrix, num.time.points = 2, rule = "DINA")
 
 #calibrate TDCM with measurement invariance assumed, ACDM measurement model
-model4 <- tdcm(data, q.matrix, num.time.points = 2, rule = "ACDM")
+model4 <- tdcm(data, q.matrix, num.time.points = 2, rule = "CRUM")
 
 #compare Model 1 (full LCDM) to Model 3 (DINA)
 tdcm.compare(model1, model3)
 
-#compare Model 1 (full LCDM) to Model 4 (ACDM)
+#compare Model 1 (full LCDM) to Model 4 (CRUM)
 tdcm.compare(model1, model4)
 
 ## ----eval = TRUE--------------------------------------------------------------
@@ -90,8 +92,8 @@ results1$model.fit$Item.RMSEA
 results1$model.fit$Mean.Item.RMSEA
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  # plot results (check plot viewer for line plot and bar chart)
-#  tdcm.plot(results1, attribute.names = standards)
+# # plot results (check plot viewer for line plot and bar chart)
+# tdcm.plot(results1, attribute.names = standards)
 
 ## ----eval = TRUE--------------------------------------------------------------
 #load the TDCM library
@@ -105,36 +107,37 @@ head(dat4)
 
 ## ----eval = TRUE--------------------------------------------------------------
 
-#calibrate mgTDCM with item and group invariance assumed, full LCDM
-mg1 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, rule = "GDINA", groups = groups, group.invariance = TRUE, item.invariance = TRUE)
+#calibrate mgTDCM with time and group invariance assumed, full LCDM
+mg1 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, rule = "LCDM", groups = groups, group.invariance = TRUE, time.invariance = TRUE)
 
 
 ## ----eval = TRUE--------------------------------------------------------------
 
 #calibrate mgTDCM with item invariance assumed, full LCDM
-mg2 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, groups = groups, group.invariance = FALSE, item.invariance = TRUE)
+mg2 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, groups = groups, group.invariance = FALSE, time.invariance = TRUE)
 
 #calibrate mgTDCM with group invariance assumed, full LCDM
-mg3 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, groups = groups, group.invariance = TRUE, item.invariance = FALSE)
+mg3 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, groups = groups, group.invariance = TRUE, time.invariance = FALSE)
 
 #calibrate mgTDCM with no invariance assumed, full LCDM
-mg4 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, groups = groups, group.invariance = FALSE, item.invariance = FALSE)
+mg4 <- mg.tdcm(data = dat4, q.matrix = qmat4, num.time.points = 2, groups = groups, group.invariance = FALSE, time.invariance = FALSE)
 
-#compare Model 1 (group/item invariance) to Model 2 (no group invariance)
+#compare Model 1 (group/time invariance) to Model 2 (no group invariance)
 tdcm.compare(mg1, mg2)
 
-#compare Model 1 (group/item invariance) to Model 3 (no item invariance)
+#compare Model 1 (group/time invariance) to Model 3 (no time invariance)
 tdcm.compare(mg1, mg3)
 
-#compare Model 1 (group/item invariance) to Model 4 (no invariance)
-tdcm.compare(model1, model4)
+#compare Model 1 (group/time invariance) to Model 4 (no invariance)
+tdcm.compare(mg1, mg4)
 
 ## ----eval = TRUE--------------------------------------------------------------
 
 #summarize results
-resultsmg1 <- mg.tdcm.summary(mg1, num.time.points = 2, attribute.names = c("4.MD.1", "4.MD.2", "4.MD.3", "4.MD.4"), group.names = c("Control", "Treatment"))
+resultsmg1 <- mg.tdcm.summary(mg1, attribute.names = c("4.MD.1", "4.MD.2", "4.MD.3", "4.MD.4"), group.names = c("Control", "Treatment"))
 resultsmg1$item.parameters
 resultsmg1$growth
+resultsmg1$growth.effects
 resultsmg1$transition.probabilities
 head(resultsmg1$transition.posteriors)
 resultsmg1$reliability

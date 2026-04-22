@@ -24,12 +24,12 @@ summary.option3 <- function(model, num.atts, num.time.points, attribute.names) {
     temp.g.rname <- paste("Attribute", i, sep = " ") # Creates temporary row name per iteration
     rnames.growth <- c(rnames.growth, temp.g.rname) # Combines row names into list
   }
-  matrix.names.growth <- c()
 
   trans <- array(NA, c(2, 2, num.atts * (num.time.points - 1))) # Creates an array of empty 2x2 matrices, one for each attribute
   trans.cnames <- c("[0]", "[1]")
   trans.rnames <- c("[0]", "[1]")
   matrix.names.trans <- c()
+  matrix.names.effect <- c()
 
   for (t in 2:num.time.points) {
     for (j in 1:num.atts) {
@@ -65,16 +65,52 @@ summary.option3 <- function(model, num.atts, num.time.points, attribute.names) {
 
       if (length(attribute.names) == A) {
         temp.name <- paste(attribute.names[j], ": Time ", (t - 1), " to Time ", t, sep = "")
+        temp.name.effect <- paste("Time ", (t - 1), " to Time ", t, sep = "")
+
       } else {
         temp.name <- paste("Attribute ", j, ": Time ", (t - 1), " to Time ", t, sep = "")
+        temp.name.effect <- paste("Time ", (t - 1), " to Time ", t, sep = "")
+
       } # Creates temporary name for each matrix
       matrix.names.trans <- c(matrix.names.trans, temp.name) # Combines matrix names into list
-    }
+
+    } #end attribute loop
+
+    matrix.names.effect <- c(matrix.names.effect, temp.name.effect) # Combines matrix names into list
+
+  } #end time point comparison loop  (successive)
+
+
+  #Growth effect sizes
+  growth.effects <- array(NA, c(num.atts, 3, num.time.points - 1))
+  g.cnames <- c("Growth", "Odds Ratio", "Cohen`s h")
+  for(g in 2:num.time.points){
+
+    #growth = difference
+    diff <- growth[, g] - growth[, g - 1]
+    growth.effects[, 1, g - 1] <-  diff
+
+    #odds ratio
+    or1 <- growth[, g] / (1 - growth[, g])
+    or2 <- growth[, g - 1] / (1 - growth[, g - 1])
+    growth.effects[, 2, g - 1] <- round(or1 / or2, 2)
+
+    #Cohen's h: arcsin difference in proportions
+    ar1 <- 2 * asin(sqrt(growth[, g]))
+    ar2 <- 2 * asin(sqrt(growth[, g - 1]))
+    growth.effects[, 3, g - 1] <- round(ar1 - ar2, 2)
+
   }
+
+
   if (length(attribute.names) == A) {
     dimnames(growth) <- list(attribute.names, cnames.growth)
+    dimnames(growth.effects) <- list(attribute.names, g.cnames, matrix.names.effect)
+
   } else {
     dimnames(growth) <- list(rnames.growth, cnames.growth)
+    dimnames(growth.effects) <- list(rnames.growth, g.cnames, matrix.names.effect)
+
   }
   dimnames(trans) <- list(trans.rnames, trans.cnames, matrix.names.trans)
 
@@ -90,6 +126,7 @@ summary.option3 <- function(model, num.atts, num.time.points, attribute.names) {
     rel <- tdcm.rel(model, num.atts, num.time.points, transition.option = transition.option)
   }
 
-  newlist3 <- list("trans" = trans, "growth" = growth, "rel" = rel)
+  newlist3 <- list("trans" = trans, "growth" = growth,
+                   "growth.effects" = growth.effects, "rel" = rel)
   return(newlist3)
 }

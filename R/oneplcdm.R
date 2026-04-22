@@ -11,7 +11,8 @@
 #' @note
 #' Currently, this model cannot be embedded within the TDCM via the \code{rule} argument.
 #'
-#' @details Estimates the single-attribute and multi-attribute 1-PLCDM described in Madison et al. (2023). Example shows that attribute subscores are sufficient statistics for classifications.
+#' @details Estimates the single-attribute and multi-attribute 1-PLCDM described in Madison et al. (2024).
+#' Example shows that attribute subscores are sufficient statistics for classifications.
 #'
 #' @return An object of class \code{gdina} with entries as indicated in the CDM package.
 #'
@@ -64,15 +65,19 @@
 #'
 #' @references
 #'
-#' George, A. C., Robitzsch, A., Kiefer, T., Gross, J., & Ünlü , A. (2016). The R package CDM for cognitive diagnosis models. \emph{Journal of Statistical Software, 74}(2), 1-24.
+#' George, A. C., Robitzsch, A., Kiefer, T., Gross, J., & Ünlü , A. (2016). The R package CDM for
+#' cognitive diagnosis models. \emph{Journal of Statistical Software, 74}(2), 1-24.
 #'
-#' Henson, R., Templin, J., & Willse, J. (2009). Defining a family of cognitive diagnosis models using log linear models with latent variables. \emph{Psychometrika, 74}, 191-21.
+#' Henson, R., Templin, J., & Willse, J. (2009). Defining a family of cognitive diagnosis models
+#' using log linear models with latent variables. \emph{Psychometrika, 74}, 191-21.
 #'
-#' Madison, M.J., Chung, S., Kim, J., & Bradshaw, L. (2023). Approaches to estimating longitudinal diagnostic classification models. \emph{Behaviormetrika}.
+#' Madison, M.J., Wind, S., Maas, L., Yamaguchi, K. & Haab, S. (2024). A one-parameter diagnostic
+#' classification model with familiar measurement properties. \emph{Journal of Educational Measurement}.
 #'
-#' Madison, M.J., Wind, S., Maas, L., Yamaguchi, K. & Haab, S. (2023). A one-parameter diagnostic classification model with familiar measurement properties. \emph{Arxiv}.
-#'
-#' Maas, L., Madison, M. J., & Brinkhuis, M. J. (2024). Properties and performance of the one-parameter log-linear cognitive diagnosis model. \emph{Frontiers}.
+#' Maas, L., Madison, M. J., & Brinkhuis, M. J. (2024). Properties and performance of the one-parameter
+#' log-linear cognitive diagnosis model. \emph{Frontiers}.
+
+
 oneplcdm <- function(data, q.matrix, progress = TRUE) { # open function
 
   # check q.matrix simple
@@ -85,7 +90,7 @@ oneplcdm <- function(data, q.matrix, progress = TRUE) { # open function
     }
 
     # estimate full lcdm
-    m1 <- CDM::gdina(data, q.matrix, linkfct = "logit", method = "ML", progress = FALSE)
+    m1 <- CDM::gdina(data, q.matrix, linkfct = "logit", method = "ML", progress = FALSE, maxit = 1)
 
     # how many items and attributes
     I <- nrow(q.matrix)
@@ -134,7 +139,8 @@ oneplcdm <- function(data, q.matrix, progress = TRUE) { # open function
   } # close if not simple Q-matrix
 
   else {
-    stop("Q-matrix has complex items. The 1-PLCDM can only be employed for single attribute assessment or for a simple structured Q-matrix.")
+    stop("Q-matrix has complex items. The 1-PLCDM can only be employed for single attribute assessment or
+         for a multi-attribute assessment with a simple structure Q-matrix.")
   }
 
 } # close function

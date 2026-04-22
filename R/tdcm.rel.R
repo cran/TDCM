@@ -12,7 +12,8 @@
 #' @return Several reliability metrics.
 #'
 #' @references
-#' Schellman, M., & Madison, M. J. (2021, July). \emph{Estimating the reliability of skill transition in longitudinal DCMs}. Paper presented at the 2021 International Meeting of the Psychometric Society.
+#' Schellman, M., & Madison, M. J. (2024). Estimating the reliability of skill transition in longitudinal DCMs.
+#' \emph{Journal of Educational and Behavioral Statistics}.
 #'
 #' @keywords internal
 #' @noRd
@@ -262,7 +263,7 @@ tdcm.rel <- function(model, num.atts, num.time.points, transition.option, attrib
       fourmat[2, 4] <- fourmat[4, 2] <- mean(cell24)
       fourmat[3, 4] <- fourmat[4, 3] <- mean(cell34)
 
-      relresults[k, 4, 1] <- polycor::polychor(fourmat)
+      relresults[k, 4, 1] <- suppressWarnings(polycor::polychor(fourmat))
     } # end attribute loop
 
     if (length(attribute.names) == num.atts) {
@@ -550,7 +551,7 @@ tdcm.rel <- function(model, num.atts, num.time.points, transition.option, attrib
         fourmat[2, 4] <- fourmat[4, 2] <- mean(cell24)
         fourmat[3, 4] <- fourmat[4, 3] <- mean(cell34)
 
-        relresults[k, 4, c] <- polycor::polychor(fourmat)
+        relresults[k, 4, c] <- suppressWarnings(polycor::polychor(fourmat))
       } # end attribute loop
     } # end transition comparison loop
 
@@ -841,7 +842,7 @@ tdcm.rel <- function(model, num.atts, num.time.points, transition.option, attrib
         fourmat[2, 4] <- fourmat[4, 2] <- mean(cell24)
         fourmat[3, 4] <- fourmat[4, 3] <- mean(cell34)
 
-        relresults[k, 4, c] <- polycor::polychor(fourmat)
+        relresults[k, 4, c] <- suppressWarnings(polycor::polychor(fourmat))
       } # end attribute loop
     } # end transition comparison loop
 

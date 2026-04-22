@@ -1,0 +1,406 @@
+---
+title: "Developer Guide"
+author:
+  - "Adriana Godamunne"
+  - "Kavya R. Kathiravan"
+  - "Braden Fuhriman"
+  - "Connor J. Bell"
+  - "Matthew J. Madison"
+  - "Michael E. Cotterell"
+output: rmarkdown::html_vignette
+description: >
+  A comprehensive resource for contributing to TDCM.
+vignette: >
+  %\VignetteIndexEntry{Developer Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+) # knitr::opts_chunk$set
+```
+
+```{r, include = FALSE}
+# determine the current package maintainer
+person_pattern <- "(?<name>.*?) <(?<email>.*?)>"
+tdcm_pkg <- utils::packageDescription("TDCM")
+tdcm_maintainer <- stringr::str_match(tdcm_pkg$Maintainer, person_pattern)[1, ]
+tdcm_maintainer_name <- tdcm_maintainer["name"]
+tdcm_maintainer_email <- tdcm_maintainer["email"]
+```
+
+::: {.pkgdown-release}
+<div class="alert alert-warning small" role="alert">
+A more recent version of this page may be available
+[here](https://cotterell.github.io/tdcm/dev/articles/developer.html).
+</div>
+:::
+
+This guide is a comprehensive resource for contributing to the _R_ package 
+**TDCM** and is intended for both new and experienced contributors. 
+Contributions to TDCM are always welcome; however, to keep things consistent and
+easier to maintain, the package maintainer asks that all contributors follow the
+policies and guidelines included in this document when preparing and submitting 
+their contributions to the package.
+
+## Types of Contributions
+
+**Would you like to help contribute to TDCM?** We are more than happy to work 
+with our community to improve our user experience! Some ways that you or your
+team can contribute are listed below. You can click on each contribution type
+to learn more. 
+
+* [Issue Reporting](#issue-reporting): Report any bugs or issues you come across 
+  so that we can try to fix them
+  
+* [Feature Requests](#feature-requests): Let us know about features you would 
+  like to see added to the package.
+  
+* [Code Contributions](#code-contributions): Help us work on the package by 
+  fixing bugs or adding features yourself!
+
+### Issue Reporting
+
+If you notice any errors, bugs, or unexpected behaviors in the TDCM package, 
+please use the Issues feature on GitHub. This will allow us to respond promptly 
+and keep all required fixes in one place. To do so, log in to your GitHub 
+account (or create one if you do not already have one), then follow the 
+instructions below:
+
+1. Navigate to our [issues page](https://github.com/cotterell/tdcm/issues) on 
+   GitHub.
+   
+2. Use the search area to see if the same issue you encountered or something 
+   similar has already been reported.
+   
+   * If an existing issue report applies to your specific issue, then open that
+     report and read the comment history. If you are unable to find a solution
+     in the comments, then leave a new comment to let us know that you have
+     encountered the same issue or something similar along with enough details
+     for a developer to reproduce your version of the issue. One of the first 
+     things the development team will do is attempt to reproduce the issue, so 
+     these additional details are very important and including them often leads
+     to quicker fixes.
+     
+   * If the issue has not been reported yet, submit a new issue report:
+          
+     1. Click the green "New Issue" button.
+     2. Click "Get Started” next to "Bug Report"
+     3. Click "Submit New Issue” once you have finished filling out the form.
+     
+3. Whether you commented on an existing issue report or submitted a new one, you 
+   can track the progress of the issue report by visiting its page on GitHub.
+   If the developers need reach out to you for more information, they will do so
+   by mentioning your name in a new comment that they add to the report. When
+   this happens, GitHub should notify you about it. Replying to the developer
+   should help the developers resolve the issue more quickly!
+
+### Feature Request
+
+**Have any features you would like us to add?** Please let us know using the 
+Issues feature on GitHub!
+
+> *Issues* is a feature on GitHub that streamlines communication between users 
+> and developers and consolidates all project tasks in one place. While this of 
+> course includes bugs, it is often used for managing feature requests and 
+> improvements, allowing it to serve as a "To-Do List" developers can use to 
+> know what they should be focusing on.
+
+To create an Issue report, log in to your GitHub account (or create one if you 
+do not already have one) and follow the instructions below:
+
+1. Navigate to our [issues page](https://github.com/cotterell/tdcm/issues) on
+   GitHub.
+   
+2. Use the search box to see if the feature you’re thinking of has already been 
+   requested.
+	 
+	 * If there is already a request, please interact with it!
+	 
+	 * You can use the emoji icon to add a reaction, such as a "thumbs up" to show
+	   your support! This will let us know which features to prioritize by showing 
+	   how many people want a particular feature. 
+	 
+	 * Additionally, feel free to voice your opinions in the replies of the 
+	   request page! You can add additional details you’d like to see implemented,
+	   or simply express your desire for the feature to be added!
+	 
+	 * If there is no existing request for the feature, you can make your own:
+	 
+	   1. Click the green "New Issue" button
+	   2. Click "Get Started” next to "Feature Request"
+	   3. Click "Submit New Issue” once you’ve finished filling out the form!
+	   
+3. Once you have posted your feature request, developers may reply to your 
+   request asking for more details. Please provide as much information as 
+   possible so the developers know what you are looking for.
+
+### Code Contributions
+
+For your contribution to be accepted, it needs to follow a consistent style, be 
+well documented, and include unit tests. You can ensure your code meets our 
+standards by following the steps outlined below. All package instructions are 
+written for use in RStudio.
+
+To install all necessary packages, run the following commands:
+
+TODO finish this section.
+
+## Git & Pull Requests
+
+The below section describes what Git is and how to use it to help contribute to this repository.
+
+### What is Git?
+
+[Git](https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F) is a 
+version control system that allows developers to track changes in their code 
+over time. It's like a time machine for your project files, enabling you to save
+different versions (called "commits") of your code. Each commit records what 
+changes were made, by whom, and when, making it easy to revert back to older 
+versions if something goes wrong with the current code.
+
+This is a breakdown of key features and concepts in Git:
+
+* [Repository](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository) (or *repo*): 
+  This is where all your project’s files and their history are stored. It can be 
+  located on your computer (local repository) or on a remote server (remote 
+  repository).
+  
+* [Commit](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository): 
+  A commit is like a snapshot of your project at a specific point in time. When 
+  you make changes to your files, you 'commit' these changes, which saves a 
+  record of what was altered, allowing you to track the evolution of your 
+  project.
+  
+* [Branch](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository): 
+  Branches allow you to create separate versions of your project within the same
+  repository. You might use a branch to develop a new feature while keeping the 
+  main project (usually called the "master" or "main" branch) stable.
+  
+* [Merge](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository): 
+  When you've finished working in a branch, you can merge your changes back into 
+  the main branch. This combines the histories of both branches, integrating the
+  new features or changes into the main project.
+  
+* [Pull](https://git-scm.com/book/en/v2/GitHub-Maintaining-a-Project): Pulling 
+  refers to downloading changes from a remote repository to your local one. This
+  is useful when working in teams, as it lets you see and integrate the changes 
+  made by others.
+  
+* [Push](https://git-scm.com/docs/git-push): Pushing refers to uploading your 
+  local repository changes to a remote repository. This is how you share your 
+  work with others or back up your current state to a remote location.
+
+Using [Git](https://git-scm.com/video/what-is-git), 
+[multiple](https://git-scm.com/video/what-is-version-control) developers can 
+work on the same project simultaneously without interfering with each others' 
+work, as they can work in different branches and merge changes only when ready. 
+This collaborative feature, along with the ability to track every change, makes
+Git an essential tool for modern software development.
+
+### Git vs. GitHub
+
+[Git](https://git-scm.com/) is a version control system (VCS) that helps 
+you track changes in your code files. It allows multiple developers to work 
+together on the same project effectively and efficiently by providing tools to
+manage differing versions of code. Git is used to create branches, handle 
+merges, revert to previous states, and more, directly from your local machine 
+or a server without needing an internet connection. Git operates primarily on 
+your local system, managing your local repository. However, it can synchronize 
+with remote repositories.
+
+[GitHub](https://github.com/) is a hosting service for Git 
+repositories. It is a platform where you can upload your Git repositories and 
+collaborate with others. Beyond the basic functionality of Git, GitHub 
+provides additional features such as bug tracking, feature requests, task 
+management, and wikis for project documentation. GitHub is designed to 
+facilitate easier collaboration among team members on a project. It offers 
+graphical tools for managing pull requests, code reviews, and even project 
+management tools like issues and project boards.
+  
+In essence, Git is the tool that enables version control, while GitHub is a 
+service that hosts your repositories and adds extra features to enhance 
+collaboration among team members. Both work hand-in-hand to support the 
+development process, but they serve different roles within that framework.
+
+Further Reading:
+
+* Chacon, S., & Straub, B. (November 2014).
+  "[Getting Started: What is Git?](https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F)"
+  _Pro Git_. Second Edition. Apress. ISBN: 978-1484200773.
+
+### What is a Pull Request?
+
+A [pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/about-pull-request-reviews) 
+(PR), also known as a [merge request](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging) 
+in some systems like GitLab, is a feature used in Git repositories that lets 
+developers notify team members about changes they've pushed to a branch in a 
+repository on platforms like GitHub, Bitbucket, or GitLab. Essentially, it's a 
+request to review and then merge this branch into another branch, typically the 
+main project branch.
+
+Here's how it works in simple terms:
+
+* [Branch Creation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request): 
+  First, a developer creates a branch from the main code base to work on a new 
+  feature, a bug fix, or any updates. This separation ensures that the main 
+  code base remains unaffected until the new changes are reviewed and approved.
+  
+* [Making Changes and Committing](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository): 
+  The developer makes necessary changes in this new branch, commits these 
+  changes, and pushes the branch to a remote repository.
+  
+* Opening a Pull Request: Once the branch is updated on the remote repository, 
+  the developer opens a pull request. This PR is essentially a request to the 
+  rest of the team to review the changes made in the branch before it gets 
+  merged into the main branch.
+
+* Review and Discussion: Team members review the changes, discuss potential 
+  improvements, and may request further 
+  [changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-comparing-branches-in-pull-requests) 
+  if needed. This process is crucial for maintaining code quality and ensuring 
+  that the integration aligns with the project's overall direction.
+
+* Approval and [Merge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-on-github): 
+  After the changes are reviewed and approved by the necessary team members or 
+  according to the project's guidelines, the pull request can be merged. This 
+  means that the changes in the branch will be integrated into the target 
+  branch, usually the main or master branch.
+  
+* Closure and Cleanup: Once merged, the pull request is closed, and it's common 
+  to delete the branch to keep the repository clean and manageable.
+  
+Pull Requests are a vital part of the collaborative development process, 
+enabling transparency, improving code quality, and helping manage contributions 
+to a project efficiently. They facilitate a peer review system which is 
+beneficial for both team cohesion and project integrity.
+
+### Using RStudio to Prepare a Pull Request
+
+RStudio does not have a built-in method of creating a pull request. However, it 
+has a built-in terminal that can be used to push changes to a forked repository 
+with a GitHub remote origin. GitHub must then be used to create a pull request.
+
+1. On GitHub: Click the “Fork” button on the project to make changes to.
+
+2. On RStudio: Create a new project and use Version Control with Git. Copy and 
+   paste the repository URL of your fork of the project.
+   
+3. Add the original repository as an upstream version. This should be done in 
+   RStudio’s built-in terminal. Type in:
+   
+   ```
+   git remote add upstream https://github.com/cotterell/tdcm.git
+   ```
+   
+4. Create and checkout a branch in which you will make changes.
+
+5. Commit your changes using the “Git” tab on RStudio. Ensure that you are on 
+   the branch with your changes.
+   
+6. Push to your forked repository in the terminal: 
+
+   ```
+   git push origin <branch name>
+   ```
+   
+7. On GitHub: Click the green icon in the top left of your repository page and 
+   create a pull request with a message describing your changes.
+
+### Using Visual Studio Code to Prepare a Pull Request
+
+TODO write.
+
+### Using a Terminal to Prepare a Pull Request
+
+You can use [GitHub’s CLI (downloadable)](https://cli.github.com) to fork a 
+repository and create a pull request within it. Fork the original project using
+[`gh repo fork <repository>`](https://cli.github.com/manual/gh_repo_fork), then
+commit your changes on a separate branch. Once all of your changes are
+committed, create a pull request using 
+[`gh pr create`](https://cli.github.com/manual/gh_pr_create) 
+
+#### Continuous Integration and Pull Requests
+
+This package utilizes continuous integration via GitHub Actions. This means that
+a script within the project will automatically run various **checks** on a pull 
+request and notify you of any problems on your **GitHub profile**. Once these 
+are resolved, provided that they do not require further inspection, your pull 
+request will be reviewed by the development team for potential inclusion into
+the package.
+
+## Policies
+
+TODO write. For example, do not modify the `DESCRIPTION` file unless you are the
+package maintainer.
+
+## Guidelines
+
+TODO write.
+
+## Maintainer Notes
+
+This section includes notes that are intended for the package maintainer only. 
+At the time of this writing, the package maintainer is `r tdcm_maintainer_name` 
+based on the package's `DESCRIPTION` file.
+
+### GitHub Actions
+
+#### R-CMD-check
+
+[![R-CMD-check](https://github.com/cotterell/tdcm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cotterell/tdcm/actions/workflows/R-CMD-check.yaml)
+
+This workflow runs `R-CMD-check` using the three major operating systems (linux, 
+macOS and Windows) with the current, development, and previous versions of R.
+
+#### pkgdown
+
+[![pkgdown](https://github.com/cotterell/tdcm/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/cotterell/tdcm/actions/workflows/pkgdown.yaml)
+
+This workflow builds the package website using 
+`pkgdown::build_site_github_pages()`, then pushes the built package website to 
+GitHub Pages. The inclusion of
+[`workflow_dispatch`](https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#workflow_dispatch)
+means that the workflow can 
+[be run manually](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow)
+or [triggered via the GitHub REST API](https://docs.github.com/en/rest/reference/actions/#create-a-workflow-dispatch-event).
+
+- Release website: [https://cotterell.github.io/tdcm/](https://cotterell.github.io/tdcm/)
+- Development website: [https://cotterell.github.io/tdcm/dev/](https://cotterell.github.io/tdcm/dev/)
+  
+#### pr-commands
+
+[![pr-commands](https://github.com/cotterell/tdcm/actions/workflows/pr-commands.yaml/badge.svg)](https://github.com/cotterell/tdcm/actions/workflows/pr-commands.yaml) 
+
+This workflow adds `/document` and `/style` commands for pull requests.
+
+#### test-coverage
+
+[![test-coverage](https://github.com/cotterell/tdcm/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/cotterell/tdcm/actions/workflows/test-coverage.yaml)
+
+This workflow uses `covr::codecov()` to query the test coverage of the package and upload the result 
+to [https://app.codecov.io/gh/cotterell/tdcm](https://app.codecov.io/gh/cotterell/tdcm).
+ 
+### Prepare a Release
+
+TODO write.
+
+## References
+
+Chacon, S., & Straub, B. (November 2014). 
+_Pro Git_. 
+Second Edition. Apress. ISBN: 978-1484200773.
+[https://git-scm.com/book/en/v2](https://git-scm.com/book/en/v2)
+
+Wickham, H., & Bryan, J. (July 2023). 
+_R Packages: Organize, Test, Document, and Share Your Code._ 
+Second Edition. O'Reilly Media. ISBN: 9781098134945.
+[https://r-pkgs.org/](https://r-pkgs.org/)
+
+Wickham, H., Hester, J., Chang. W., & Bryan, J. (2022). 
+_devtools: Tools to Make Developing R Packages Easier_. 
+[https://devtools.r-lib.org/](https://devtools.r-lib.org/), 
+[https://github.com/r-lib/devtools](https://github.com/r-lib/devtools)

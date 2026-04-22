@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![CRAN
+status](https://www.r-pkg.org/badges/version/TDCM)](https://CRAN.R-project.org/package=TDCM)
 [![R-CMD-check](https://github.com/cotterell/tdcm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cotterell/tdcm/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/cotterell/tdcm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/cotterell/tdcm?branch=main)
@@ -36,7 +38,7 @@ install.packages("TDCM")
 </div>
 
 ``` r
-# Or install the latest development version of TDCM from GitHub:
+# Install the latest development version of TDCM from GitHub:
 if (!require("devtools")) install.packages("devtools")
 devtools::install_github("cotterell/tdcm")
 ```

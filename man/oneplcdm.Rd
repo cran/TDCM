@@ -20,7 +20,8 @@ An object of class \code{gdina} with entries as indicated in the CDM package.
 Function to estimate the 1-PLCDM (Madison et al., 2023; Maas et al., 2023).
 }
 \details{
-Estimates the single-attribute and multi-attribute 1-PLCDM described in Madison et al. (2023). Example shows that attribute subscores are sufficient statistics for classifications.
+Estimates the single-attribute and multi-attribute 1-PLCDM described in Madison et al. (2024).
+Example shows that attribute subscores are sufficient statistics for classifications.
 }
 \note{
 Currently, this model cannot be embedded within the TDCM via the \code{rule} argument.
@@ -70,13 +71,15 @@ par(oldpar)
 
 }
 \references{
-George, A. C., Robitzsch, A., Kiefer, T., Gross, J., & Ünlü , A. (2016). The R package CDM for cognitive diagnosis models. \emph{Journal of Statistical Software, 74}(2), 1-24.
+George, A. C., Robitzsch, A., Kiefer, T., Gross, J., & Ünlü , A. (2016). The R package CDM for
+cognitive diagnosis models. \emph{Journal of Statistical Software, 74}(2), 1-24.
 
-Henson, R., Templin, J., & Willse, J. (2009). Defining a family of cognitive diagnosis models using log linear models with latent variables. \emph{Psychometrika, 74}, 191-21.
+Henson, R., Templin, J., & Willse, J. (2009). Defining a family of cognitive diagnosis models
+using log linear models with latent variables. \emph{Psychometrika, 74}, 191-21.
 
-Madison, M.J., Chung, S., Kim, J., & Bradshaw, L. (2023). Approaches to estimating longitudinal diagnostic classification models. \emph{Behaviormetrika}.
+Madison, M.J., Wind, S., Maas, L., Yamaguchi, K. & Haab, S. (2024). A one-parameter diagnostic
+classification model with familiar measurement properties. \emph{Journal of Educational Measurement}.
 
-Madison, M.J., Wind, S., Maas, L., Yamaguchi, K. & Haab, S. (2023). A one-parameter diagnostic classification model with familiar measurement properties. \emph{Arxiv}.
-
-Maas, L., Madison, M. J., & Brinkhuis, M. J. (2024). Properties and performance of the one-parameter log-linear cognitive diagnosis model. \emph{Frontiers}.
+Maas, L., Madison, M. J., & Brinkhuis, M. J. (2024). Properties and performance of the one-parameter
+log-linear cognitive diagnosis model. \emph{Frontiers}.
 }

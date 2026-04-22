@@ -1,6 +1,6 @@
 Package: TDCM
 Title: The Transition Diagnostic Classification Model Framework
-Version: 0.1.0
+Version: 0.3.0
 Authors@R: c(
     person(
       "Matthew J.", "Madison",
@@ -16,6 +16,11 @@ Authors@R: c(
     person(
       "Minjeong", "Jeon",
       email = "mjjeon@ucla.edu",
+      role = c("aut", "cph")
+    ),
+    person(
+      "Constanza", "Mardones-Segovia",
+      email = "constanza.mardonessegovia@uga.edu",
       role = c("aut", "cph")
     ),
     person(
@@ -61,27 +66,30 @@ Description: Estimate the transition diagnostic classification model (TDCM)
     transition probabilities, transitional reliability, attribute correlations, 
     model fit, and growth plots.
 License: MIT + file LICENSE
-URL: https://github.com/cotterell/tdcm
+URL: https://cotterell.github.io/tdcm/,
+        https://github.com/cotterell/tdcm
 BugReports: https://github.com/cotterell/tdcm/issues
 Encoding: UTF-8
 Language: en-US
 LazyData: true
 Depends: R (>= 4.2.0)
 Suggests: devtools, knitr, lintr, MASS, rmarkdown, ROI, roxygen2,
-        styler (>= 1.10.2), testthat (>= 3.0.0), tinytex, V8
+        rsconnect, styler (>= 1.10.2), testthat (>= 3.0.0), tinytex, V8
 Config/testthat/edition: 3
-Config/Needs/website: tidyverse/tidytemplate
+Config/Needs/website: pkgdown
 SystemRequirements: pandoc
 VignetteBuilder: knitr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Imports: CDM, gtools, polycor, stringr
 NeedsCompilation: no
-Packaged: 2024-02-03 19:56:22 UTC; mepcotterell
-Author: Matthew J. Madison [aut, cph] (<https://orcid.org/0000-0002-2944-7442>),
+Packaged: 2026-04-22 21:04:45 UTC; mepcott
+Author: Matthew J. Madison [aut, cph] (ORCID:
+    <https://orcid.org/0000-0002-2944-7442>),
   Sergio Haab [aut],
   Minjeong Jeon [aut, cph],
-  Michael E. Cotterell [aut, cre, cph]
-    (<https://orcid.org/0000-0002-4302-0891>),
+  Constanza Mardones-Segovia [aut, cph],
+  Michael E. Cotterell [aut, cre, cph] (ORCID:
+    <https://orcid.org/0000-0002-4302-0891>),
   University of Georgia [cph] (The content and opinions expressed in this
     material do not necessarily reflect the views of nor are they
     endorsed by the University of Georgia or the University System of
@@ -93,4 +101,4 @@ Author: Matthew J. Madison [aut, cph] (<https://orcid.org/0000-0002-2944-7442>),
     National Science Foundation under NSF Award Number 1921373.)
 Maintainer: Michael E. Cotterell <mepcott@uga.edu>
 Repository: CRAN
-Date/Publication: 2024-02-05 19:30:02 UTC
+Date/Publication: 2026-04-22 21:20:02 UTC

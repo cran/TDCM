@@ -41,10 +41,10 @@ pre <- dat1[, 1:20]
 post <- dat1[, 21:40]
 
 # calibrate LCDM with post-test data
-m1 <- CDM::gdina(data = post, q.matrix = qmat1, linkfct = "logit", method = "ML")
+m1 <- CDM::gdina(data = pre, q.matrix = qmat1, linkfct = "logit", method = "ML")
 
 # score pre-test responses
-m2 <- TDCM::tdcm.score(m1, newdata = pre, q.matrix = qmat1)
+m2 <- TDCM::tdcm.score(m1, newdata = post, q.matrix = qmat1)
 summary(m2)
 m2$pattern
 
